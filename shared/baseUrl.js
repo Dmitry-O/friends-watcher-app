@@ -1,0 +1,1 @@
+export const baseUrl = 'https://infinite-brook-32272.herokuapp.com/';
