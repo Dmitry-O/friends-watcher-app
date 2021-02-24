@@ -4,6 +4,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import { createAppContainer } from 'react-navigation';
 import { createBottomTabNavigator } from 'react-navigation-tabs'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import SearchScreen from './SearchScreen';
 import FriendsScreen from './FriendsScreen';
 import RequestsScreen from './RequestsScreen';
@@ -17,7 +19,7 @@ const bottomTabNavigator = createBottomTabNavigator(
             screen: SearchScreen,
             navigationOptions: {
                 tabBarIcon: ({ tintColor }) => (
-                    <MaterialCommunityIcons name="home" color={tintColor} size={25} />
+                    <FontAwesome5 name="search" color={tintColor} size={25} />
                 )
             }
         },
@@ -25,7 +27,7 @@ const bottomTabNavigator = createBottomTabNavigator(
             screen: FriendsScreen,
             navigationOptions: {
                 tabBarIcon: ({ tintColor }) => (
-                    <MaterialCommunityIcons name="home" color={tintColor} size={25} />
+                    <FontAwesome5 name="user-friends" color={tintColor} size={25} />
                 )
             }
         },
@@ -33,7 +35,7 @@ const bottomTabNavigator = createBottomTabNavigator(
             screen: RequestsScreen,
             navigationOptions: {
                 tabBarIcon: ({ tintColor }) => (
-                    <MaterialCommunityIcons name="home" color={tintColor} size={25} />
+                    <FontAwesome5 name="user-clock" color={tintColor} size={25} />
                 )
             }
         },
@@ -41,7 +43,7 @@ const bottomTabNavigator = createBottomTabNavigator(
             screen: MapScreen,
             navigationOptions: {
                 tabBarIcon: ({ tintColor }) => (
-                    <MaterialCommunityIcons name="map" color={tintColor} size={25} />
+                    <FontAwesome5 name="map-marked-alt" color={tintColor} size={25} />
                 )
             }
         },
@@ -49,30 +51,13 @@ const bottomTabNavigator = createBottomTabNavigator(
             screen: SettingsScreen,
             navigationOptions: {
                 tabBarIcon: ({ tintColor }) => (
-                    <MaterialCommunityIcons name="home" color={tintColor} size={25} />
+                    <FontAwesome name="gear" color={tintColor} size={25} />
                 )
             }
         }
     },
     {initialRouteName: 'Map'}
 );
-
-bottomTabNavigator.navigationOptions = ({ navigation }) => {
-    let tabBarVisible;
-    if (navigation.state.routes.length > 1) {
-      navigation.state.routes.map(route => {
-        if (route.routeName === "FriendMap") {
-          tabBarVisible = false;
-        } else {
-          tabBarVisible = true;
-        }
-      });
-    }
-  
-    return {
-      tabBarVisible
-    };
-  };
 
 const MenuNavigator = createAppContainer(bottomTabNavigator);
 

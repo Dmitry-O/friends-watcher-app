@@ -8,6 +8,8 @@ var token = 'null';
 const loadToken = async() => {
     try {
         token = await AsyncStorage.getItem('token');
+        await AsyncStorage.setItem('signup', 'false');
+        console.log("Siign uuuup: ", await AsyncStorage.getItem('signup'));
         console.log("Tooookeeeen: ", token);
     }
     catch (err) {
@@ -328,6 +330,18 @@ const save = async({token, creds}) => {
         await AsyncStorage.removeItem('token');
         await AsyncStorage.setItem('token', token);
         await AsyncStorage.setItem('creds', creds);
+        await AsyncStorage.removeItem('loggedout');
+    }
+    catch (err) {
+        console.log(err);
+    }
+}
+
+const setSignFlag = async(flag) => {
+    try {
+        //await AsyncStorage.removeItem('signup');
+        await AsyncStorage.setItem('signup', flag);
+        console.log("Flag set: ", await AsyncStorage.getItem('signup'));
     }
     catch (err) {
         console.log(err);
@@ -338,7 +352,9 @@ const remove = async() => {
     try {
         await AsyncStorage.removeItem('token');
         await AsyncStorage.removeItem('creds');
+        await AsyncStorage.removeItem('signup');
         await AsyncStorage.removeItem('isAuthenticated');
+        await AsyncStorage.setItem('loggedout', 'true');
     }
     catch (err) {
         console.log(err);
@@ -379,46 +395,15 @@ export const loginUser = (creds) => (dispatch) => {
     })
     .then(response => {
         if (response.ok) {
+            //console.log('Suuuuuuussssceees');
+            //setSignFlag('false');
             return response;
         } else {
+            //setSignFlag('true');
             if (response.status === 401) {
-                return fetch(baseUrl + 'users/signup', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type':'application/json' 
-                    },
-                    body: JSON.stringify(creds)
-                })
-                .then(response => {
-                    if (response.ok) {
-                        return fetch(baseUrl + 'users/login', {
-                            method: 'POST',
-                            headers: { 
-                                'Content-Type':'application/json' 
-                            },
-                            body: JSON.stringify(creds)
-                        })
-                        .then(response => {
-                            if (response.ok)
-                                return response;
-                            else {
-                                var error = new Error('Error ' + response.status + ': ' + response.statusText);
-                                error.response = response;
-                                throw error;
-                            }
-                        },
-                        error => { throw error; }
-                        )
-                    }
-                    else {
-                        var error = new Error('Error ' + response.status + ': ' + response.statusText);
-                        error.response = response;
-                        throw error;
-                    }
-                },
-                error => { throw error; }
-                )
+                return response;
             }
+                
             else {
                 var error = new Error('Error ' + response.status + ': ' + response.statusText);
                 error.response = response;
@@ -432,6 +417,8 @@ export const loginUser = (creds) => (dispatch) => {
     .then(response => response.json())
     .then(response => {
         if (response.success) {
+            setSignFlag('false');
+            remove();
             save({token: response.token, creds: JSON.stringify(creds)});
             // If login was successful, set the token in local storage
             //localStorage.setItem('token', response.token);
@@ -442,6 +429,10 @@ export const loginUser = (creds) => (dispatch) => {
             console.log(receiveLogin(response).token);
         }
         else {
+            if (response.err.name === 'IncorrectUsernameError') {
+                setSignFlag('true');
+                //console.log("---Yes, this is this problem");
+            }
             var error = new Error('Error ' + response.status);
             error.response = response;
             throw error;
@@ -449,6 +440,29 @@ export const loginUser = (creds) => (dispatch) => {
     })
     .catch(error => dispatch(loginError(error.message)))
 };
+
+export const signupUser = (creds) => (dispatch) => {
+    return fetch(baseUrl + 'users/signup', {
+        method: 'POST',
+        headers: { 
+            'Content-Type':'application/json' 
+        },
+        body: JSON.stringify(creds)
+    })
+    .then(response => {
+        if (response.ok) {
+            dispatch(loginUser(creds))
+        }
+        else {
+            var error = new Error('Error ' + response.status + ': ' + response.statusText);
+            error.response = response;
+            throw error;
+        }
+    },
+    error => { throw error; }
+    )
+    .catch(error => dispatch(loginError(error.message)))
+}
 
 export const requestLogout = () => {
     return {
@@ -464,8 +478,8 @@ export const receiveLogout = () => {
 
 // Logs the user out
 export const logoutUser = () => (dispatch) => {
-    dispatch(requestLogout());
     remove();
+    dispatch(requestLogout());
     //localStorage.removeItem('token');
     //localStorage.removeItem('creds');
     //dispatch(favoritesFailed("Error 401: Unauthorized"));

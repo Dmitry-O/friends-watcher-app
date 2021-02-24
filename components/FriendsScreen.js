@@ -1,11 +1,12 @@
 import React from 'react';
-import { StyleSheet, Text, View, FlatList, Alert, Modal, Pressable, ScrollView, SafeAreaView, LogBox } from 'react-native';
-import { ListItem, Avatar, Button } from 'react-native-elements';
+import { StyleSheet, Text, View, FlatList, Alert, Modal, Pressable, ScrollView, SafeAreaView, LogBox, ActivityIndicator } from 'react-native';
+import { ListItem, Avatar, Button, Header, Icon } from 'react-native-elements';
 import { createBottomTabNavigator, createAppContainer, NavigationEvents } from 'react-navigation';
 import {fetchFriends, deleteFriend} from '../redux/ActionCreators';
 import {connect} from 'react-redux';
 import getDistance from '../shared/destinationFunc';
 import getOnlineStatus from '../shared/onlineFunc';
+import AnimatedLoader from "react-native-animated-loader";
 
 const mapStateToProps = state => {
     return {
@@ -67,6 +68,13 @@ const styles = StyleSheet.create({
     }
   });
 
+const useEffect = (fetchFriends) => React.useEffect(() => {
+    let isMounted = true;
+    if (isMounted)
+        fetchFriends();
+    return () => { isMounted = false };
+});
+
 const FriendInfo = ({item, setModalVisible, visible, myCoords, navigate, deleteFriend}) => {
     return (
         <Modal
@@ -89,7 +97,7 @@ const FriendInfo = ({item, setModalVisible, visible, myCoords, navigate, deleteF
                     </View>
                     <Text>Tel. num: {item.telnum}</Text>
                     <Text>{item.visible ? getOnlineStatus(item.timestamp ? item.timestamp : new Date()) : null}</Text>
-                    <Text>{ item.visible ? 'In' + Math.floor(getDistance(+item.coords.latitude, +item.coords.longitude, +myCoords.latitude, +myCoords.longitude)) 
+                    <Text>{ item.visible && item.coords !== undefined ? 'In' + Math.floor(getDistance(+item.coords.latitude, +item.coords.longitude, +myCoords.latitude, +myCoords.longitude)) 
                             + 'km from you' : null}</Text>
                     <View style={styles.modalContent}>
                         <Button title="View on Map" disabled={item.visible ? false : true}
@@ -111,9 +119,12 @@ const FriendInfo = ({item, setModalVisible, visible, myCoords, navigate, deleteF
 
 class FriendsScreen extends React.Component {
     componentDidMount() {
-        this.props.fetchFriends();
+        //isMounted = true;
+        //if (isMounted)
+        this.props.fetchFriends;
         LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
     }
+
 
     constructor(props) {
         super(props);
@@ -132,15 +143,15 @@ class FriendsScreen extends React.Component {
 
     render() {
         const renderFriendItem = ({item, index}) => {
+            //useEffect();
             //const [modalVisible, setModalVisible] = React.useState(false);
             return (
                 <View>
                     <ListItem key={index} bottomDivider onPress={() => this.setModalVisible(true, item._id)}>
-                        <Avatar source={{uri: item.image}} />
+                        <Avatar rounded source={{uri: item.image}} />
                         <ListItem.Content>
                             <ListItem.Title>{item.fullname}</ListItem.Title>
                             <ListItem.Subtitle>{item.username}</ListItem.Subtitle>
-                            <Text>{index} : {item._id}</Text>
                         </ListItem.Content>
                         {
                             this.state.modalId === item._id ?
@@ -150,6 +161,7 @@ class FriendsScreen extends React.Component {
                                 myCoords={this.props.friends.friends.user.coords}
                                 navigate={this.props.navigation.navigate}
                                 deleteFriend={this.props.deleteFriend}
+                                fetchFriends={this.props.fetchFriends}
                             />
                             : null
                         }
@@ -171,28 +183,46 @@ class FriendsScreen extends React.Component {
        var data = this.props.friends.friends ? this.props.friends.friends.friends : null;
        //console.log("An Arraaaayyy: ", data);
        
-    
-        return (
-            <View style={{ flex: 1, padding: 24 }}>
-                { this.props.friends.friends !== null ? this.props.friends.friends.length !== 0 ? 
-                    <ScrollView>
-                        <SafeAreaView style={{flex: 1}}>
-                            <FlatList
-                                data={data}
-                                renderItem={(renderFriendItem)}
-                                keyExtractor={item => item._id}
-                            />
-                    </SafeAreaView>
-                </ScrollView>
-                :   <View style={{flex: 1, justifyContent: "center", alignItems: "center"}}>
-                        <Text style={{fontSize: 30, fontWeight: "bold"}}>Friend list is empty...</Text>
-                        <Button style={{marginTop: 50}} title="Find friends" onPress={() => this.props.navigation.navigate('Search')}/>
+       if (this.props.friends.isLoading)
+            return (
+                <View style={{flex: 1, justifyContent: "center", alignItems: "center"}}> 
+                    <ActivityIndicator size="large" color="#0000ff"/>
+                    <Text style={{color: "blue", fontSize: 40, fontWeight: "bold"}}>Loading...</Text>            
+                </View>
+            );
+        else return (
+            <View style={{flex: 1}}>
+                <Header containerStyle={{height: 70, backgroundColor: 'black'}}>
+                    <View/>
+                    <View>
+                        <Text style={{color: '#fff', fontSize: 30, fontWeight: 'bold'}}>
+                            Friends
+                        </Text>
                     </View>
-                :    <View style={{flex: 1, justifyContent: "center", alignItems: "center"}}>
-                        <Text style={{fontSize: 30, fontWeight: "bold"}}>Friend list is empty...</Text>
-                        <Button style={{marginTop: 50}} title="Find friends" onPress={() => this.props.navigation.navigate('Search')}/>
-                    </View> 
-                }
+                    <Icon 
+                        name="users"
+                        type="font-awesome-5"
+                        color="#fff"
+                        style={{marginTop: 10}}
+                    />
+                </Header>
+                <View style={{ flex: 1, padding: 24 }}>
+                    { this.props.friends.friends !== null || this.props.friends.friends.length !== 0 ? 
+                        <ScrollView>
+                            <SafeAreaView style={{flex: 1}}>
+                                <FlatList
+                                    data={data}
+                                    renderItem={(renderFriendItem)}
+                                    keyExtractor={item => item._id}
+                                />
+                        </SafeAreaView>
+                    </ScrollView>
+                    :   <View style={{flex: 1, justifyContent: "center", alignItems: "center"}}>
+                            <Text style={{fontSize: 30, fontWeight: "bold"}}>Friend list is empty...</Text>
+                            <Button style={{marginTop: 50}} title="Find friends" onPress={() => this.props.navigation.navigate('Search')}/>
+                        </View>
+                    }
+                </View>
             </View>
 
             /*

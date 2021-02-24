@@ -6,6 +6,7 @@ import {fetchFriends, postCoords, fetchAccount} from '../redux/ActionCreators';
 import {connect} from 'react-redux';
 
 var showAllFriends = true;
+var isMounted = false;
 
 const mapStateToProps = state => {
     return {
@@ -22,8 +23,17 @@ const mapDispatchToProps = dispatch => ({
 
 class MapScreen extends React.Component {
     componentDidMount() {
-        this.props.fetchFriends();
-        this.props.fetchAccount();
+        isMounted = true;
+        //setTimeout(() => {
+        if (isMounted) {
+            this.props.fetchFriends();
+            this.props.fetchAccount();
+        }
+        //}, 3000);
+    }
+
+    componentWillUnmount() {
+        isMounted = false;
     }
 
     render() {
@@ -97,7 +107,7 @@ const Map = ({friends, user, postCoords}) => {
     const [showTip, setShowTip] = React.useState({show: false, id: ''});
 
     const markers = friends ? friends.map((friend) => {
-        if (friend.visible)
+        if (friend.visible && friend.coords)
             return (
                 <Marker style={styles.markerContainer}
                     key={friend._id} 
