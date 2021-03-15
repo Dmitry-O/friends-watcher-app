@@ -5,6 +5,7 @@ import {Auth}  from './auth';
 import {Requests} from './requests';
 import {Users} from './users';
 import {account} from './account';
+import {FriendsCoords} from './friendsCoords';
 
 /*
 import {wishlist} from './wishlist';
@@ -21,7 +22,8 @@ export const ConfigureStore = () => {
             auth: Auth,
             requests: Requests,
             users: Users,
-            account
+            account,
+            friendsCoords: FriendsCoords
             /*wishlist,
             rentedTools,
             account,

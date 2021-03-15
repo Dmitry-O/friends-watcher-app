@@ -1,8 +1,8 @@
 import 'react-native-gesture-handler';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, AsyncStorage } from 'react-native';
 import { createAppContainer } from 'react-navigation';
-import { createBottomTabNavigator } from 'react-navigation-tabs'
+import { createBottomTabNavigator, BottomTabBar } from 'react-navigation-tabs'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -25,27 +25,50 @@ const bottomTabNavigator = createBottomTabNavigator(
         },
         Friends: {
             screen: FriendsScreen,
-            navigationOptions: {
+            navigationOptions: ({navigation}) => ({
                 tabBarIcon: ({ tintColor }) => (
                     <FontAwesome5 name="user-friends" color={tintColor} size={25} />
-                )
-            }
+                ),
+                tabBarOnPress: async () => {
+                    try {
+                        await AsyncStorage.setItem('stopFetchFriends', "true");
+                    }
+                    catch (err) {
+                        console.log(err);
+                    }
+                    navigation.navigate(navigation.state.routeName, navigation.state.index);
+                }
+            })
         },
         Requests: {
             screen: RequestsScreen,
-            navigationOptions: {
+            navigationOptions: ({navigation}) => (
+                {
                 tabBarIcon: ({ tintColor }) => (
                     <FontAwesome5 name="user-clock" color={tintColor} size={25} />
-                )
-            }
+                ),
+                tabBarOnPress: () => {
+                    //console.log('onPress:', navigation.state.routeName);
+                    navigation.navigate(navigation.state.routeName, navigation.state.index);
+                }
+            })
         },
         Map: {
             screen: MapScreen,
-            navigationOptions: {
+            navigationOptions: ({navigation}) => ({
                 tabBarIcon: ({ tintColor }) => (
                     <FontAwesome5 name="map-marked-alt" color={tintColor} size={25} />
-                )
-            }
+                ),
+                tabBarOnPress: async () => {
+                    try {
+                        await AsyncStorage.setItem('stopFetchFriends', "false");
+                    }
+                    catch (err) {
+                        console.log(err);
+                    }
+                    navigation.navigate(navigation.state.routeName, navigation.state.index);
+                }
+            })
         },
         Settings: {
             screen: SettingsScreen,
@@ -56,7 +79,10 @@ const bottomTabNavigator = createBottomTabNavigator(
             }
         }
     },
-    {initialRouteName: 'Map'}
+    {
+        initialRouteName: 'Map',
+        tabBarOptions: {tabStyle: {backgroundColor: "black"}}
+    }
 );
 
 const MenuNavigator = createAppContainer(bottomTabNavigator);

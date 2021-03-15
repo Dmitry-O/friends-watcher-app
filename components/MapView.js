@@ -3,11 +3,9 @@ import { requireNativeComponent } from 'react-native';
 
 class MapView extends React.Component {
   render() {
-    return <RNTMap {...this.props} />;
+    return <RNTMap {...this.props}/>;
   }
 }
-
-
 
 var RNTMap = requireNativeComponent('RNTMap', MapView);
 

@@ -6,6 +6,7 @@ import {fetchFriends, deleteFriend} from '../redux/ActionCreators';
 import {connect} from 'react-redux';
 import getDistance from '../shared/destinationFunc';
 import getOnlineStatus from '../shared/onlineFunc';
+import { _styles } from '../shared/styles';
 import AnimatedLoader from "react-native-animated-loader";
 
 const mapStateToProps = state => {
@@ -28,14 +29,15 @@ const styles = StyleSheet.create({
     },
     modalContent: {
         flex: 1,
-        flexDirection: "row"
+        flexDirection: "row",
+        padding: 10,
     },
     modalView: {
-      margin: 20,
-      height: 250,
+      margin: 10,
+      height: 375,
       backgroundColor: "white",
       borderRadius: 20,
-      padding: 35,
+      padding: 15,
       alignItems: "center",
       shadowColor: "#000",
       shadowOffset: {
@@ -44,7 +46,11 @@ const styles = StyleSheet.create({
       },
       shadowOpacity: 0.25,
       shadowRadius: 4,
-      elevation: 5
+      elevation: 5,
+      backgroundColor: "black",
+      borderStyle: "solid",
+      borderWidth: 1,
+      borderColor: "yellow"
     },
     button: {
       borderRadius: 20,
@@ -64,7 +70,9 @@ const styles = StyleSheet.create({
     },
     modalText: {
       marginBottom: 15,
-      textAlign: "center"
+      textAlign: "center",
+      color: "white",
+      fontSize: 25
     }
   });
 
@@ -89,18 +97,18 @@ const FriendInfo = ({item, setModalVisible, visible, myCoords, navigate, deleteF
             <View style={styles.centeredView}>
                 <View style={styles.modalView}>
                     <View style={styles.modalContent}>
-                        <Avatar source={{uri: item.image}}/>
+                        <Avatar rounded size="large" avatarStyle={_styles.avatarStyle} source={{uri: item.image}}/>
                         <View style={{flexDirection: "column"}}>
                             <Text style={styles.modalText}>{item.fullname}</Text>
                             <Text style={styles.modalText}>{item.username}</Text>
                         </View>
                     </View>
-                    <Text>Tel. num: {item.telnum}</Text>
-                    <Text>{item.visible ? getOnlineStatus(item.timestamp ? item.timestamp : new Date()) : null}</Text>
-                    <Text>{ item.visible && item.coords !== undefined ? 'In' + Math.floor(getDistance(+item.coords.latitude, +item.coords.longitude, +myCoords.latitude, +myCoords.longitude)) 
-                            + 'km from you' : null}</Text>
+                    <Text style={styles.modalText}>{item.telnum ? 'Tel. num: ' + item.telnum : null}</Text>
+                    <Text style={styles.modalText}>{item.visible ? getOnlineStatus(item.timestamp ? item.timestamp : new Date()) : 'Was online recently'}</Text>
+                    <Text style={styles.modalText}>{item.visible && item.coords !== undefined ? 'In ' + Math.floor(getDistance(+item.coords.latitude, +item.coords.longitude, +myCoords.latitude, +myCoords.longitude)) 
+                            + ' km from you' : null}</Text>
                     <View style={styles.modalContent}>
-                        <Button title="View on Map" disabled={item.visible ? false : true}
+                        <Button title="View on Map" disabled={!item.visible ?? false}
                             onPress={() => navigate('Map', {friend: item})}
                         />
                         <Button title="Delete friend" onPress={() => deleteFriend(item._id)}/>
@@ -146,27 +154,25 @@ class FriendsScreen extends React.Component {
             //useEffect();
             //const [modalVisible, setModalVisible] = React.useState(false);
             return (
-                <View>
-                    <ListItem key={index} bottomDivider onPress={() => this.setModalVisible(true, item._id)}>
-                        <Avatar rounded source={{uri: item.image}} />
-                        <ListItem.Content>
-                            <ListItem.Title>{item.fullname}</ListItem.Title>
-                            <ListItem.Subtitle>{item.username}</ListItem.Subtitle>
-                        </ListItem.Content>
-                        {
-                            this.state.modalId === item._id ?
-                            <FriendInfo item={item}
-                                setModalVisible={this.setModalVisible}
-                                visible={this.state.modalVisible}
-                                myCoords={this.props.friends.friends.user.coords}
-                                navigate={this.props.navigation.navigate}
-                                deleteFriend={this.props.deleteFriend}
-                                fetchFriends={this.props.fetchFriends}
-                            />
-                            : null
-                        }
-                    </ListItem>
-                </View>
+                <ListItem key={index} bottomDivider containerStyle={{backgroundColor: "black"}}
+                    onPress={() => this.setModalVisible(true, item._id)}>
+                    <Avatar rounded size="large" avatarStyle={_styles.avatarStyle} source={{uri: item.image}} />
+                    <ListItem.Content>
+                        <ListItem.Title style={_styles.itemTitle}>{item.fullname}</ListItem.Title>
+                        <ListItem.Subtitle style={_styles.itemSubtitle}>{item.username}</ListItem.Subtitle>
+                    </ListItem.Content>
+                    {
+                        this.state.modalId === item._id ?
+                        <FriendInfo item={item}
+                            setModalVisible={this.setModalVisible}
+                            visible={this.state.modalVisible}
+                            myCoords={this.props.friends.friends.user.coords}
+                            navigate={this.props.navigation.navigate}
+                            deleteFriend={this.props.deleteFriend}
+                        />
+                        : null
+                    }
+                </ListItem>
 
                 /*<ListItem
                     key={index}
@@ -185,13 +191,13 @@ class FriendsScreen extends React.Component {
        
        if (this.props.friends.isLoading)
             return (
-                <View style={{flex: 1, justifyContent: "center", alignItems: "center"}}> 
+                <View style={_styles.loadingContainer}> 
                     <ActivityIndicator size="large" color="#0000ff"/>
                     <Text style={{color: "blue", fontSize: 40, fontWeight: "bold"}}>Loading...</Text>            
                 </View>
             );
         else return (
-            <View style={{flex: 1}}>
+            <View style={_styles.container}>
                 <Header containerStyle={{height: 70, backgroundColor: 'black'}}>
                     <View/>
                     <View>

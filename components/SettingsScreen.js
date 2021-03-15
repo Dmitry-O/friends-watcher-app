@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import { Avatar, Header, Icon } from 'react-native-elements';
 import { TextInput } from 'react-native-gesture-handler';
 import { FlatGrid } from 'react-native-super-grid';
+import { _styles } from '../shared/styles';
 
 var stopTimer = false;
 
@@ -43,7 +44,8 @@ const styles = StyleSheet.create({
     },
     textContnet: {
         fontSize: 26,
-        paddingTop: 10
+        paddingTop: 10,
+        color: "white"
     },
     modalContent: {
         flex: 1,
@@ -96,13 +98,13 @@ class SettingsScreen extends Component {
 
         if (this.props.account.isLoading)
             return (
-                <View style={{flex: 1, justifyContent: "center", alignItems: "center"}}> 
+                <View style={_styles.loadingContainer}> 
                     <ActivityIndicator size="large" color="#0000ff"/>
                     <Text style={{color: "blue", fontSize: 40, fontWeight: "bold"}}>Loading...</Text>            
                 </View>
             );
         else return (
-            <View style={{flex: 1}}>
+            <View style={_styles.container}>
                 <Header containerStyle={{height: 70, backgroundColor: 'black'}}>
                     <View/>
                     <View>
@@ -220,7 +222,7 @@ const renderAvatars = ({item, index}) => {
                         {info.image ? <Avatar rounded style={{width: 100, height: 100}} source={{uri: info.image}}/> : null}
                         <Button title="View pics" onPress={() => setModalVisible(true)}/>
                     </View>
-                    <TextInput style={{fontSize: 30, fontWeight: "bold"}} value={info.fullname} onChangeText={(text) => setInfo({
+                    <TextInput style={{fontSize: 30, fontWeight: "bold", color: "white"}} value={info.fullname} onChangeText={(text) => setInfo({
                         fullname: text,
                         telnum: info.telnum,
                         visible: info.visible,

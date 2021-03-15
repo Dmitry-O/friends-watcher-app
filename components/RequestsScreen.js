@@ -1,8 +1,9 @@
 import React from 'react';
 import { StyleSheet,  ActivityIndicator, Text, View, AsyncStorage, FlatList, Image, ScrollView, SafeAreaView, LogBox } from 'react-native';
 import { ListItem, Avatar, Button, Header, Icon } from 'react-native-elements';
-import {fetchRequests, postRequests} from '../redux/ActionCreators';
+import {fetchRequests, postRequests, deleteRequest} from '../redux/ActionCreators';
 import {connect} from 'react-redux';
+import { _styles } from '../shared/styles';
 
 const mapStateToProps = state => {
     return {
@@ -12,7 +13,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
     fetchRequests: () => {dispatch(fetchRequests())},
-    postRequests: (requestId) => {dispatch(postRequests(requestId))}
+    postRequests: (requestId) => {dispatch(postRequests(requestId))},
+    deleteRequest: (requestId) => {dispatch(deleteRequest(requestId))}
 });
 
 class RequestsScreen extends React.Component {
@@ -33,14 +35,15 @@ class RequestsScreen extends React.Component {
     }
 
     render() {
-        const renderFriendItem = ({item, index}) => {
+        const renderRequestItem = ({item, index}) => {
             return (
-                <ListItem key={index} bottomDivider>
+                <ListItem key={index} bottomDivider containerStyle={{backgroundColor: "black"}}>
                     <Avatar rounded source={{uri: item.image}} />
                     <ListItem.Content>
-                        <ListItem.Title>{item.fullname}</ListItem.Title>
-                        <ListItem.Subtitle>{item.username}</ListItem.Subtitle>
+                        <ListItem.Title style={_styles.itemTitle}>{item.fullname}</ListItem.Title>
+                        <ListItem.Subtitle style={_styles.itemSubtitle}>{item.username}</ListItem.Subtitle>
                     </ListItem.Content>
+                    <Button title="Delete" onPress={() => this.props.deleteRequest(item._id)}/>
                     <Button title="Add friend" onPress={() => this.handlePost(item._id)}/>
                 </ListItem>
             );
@@ -50,13 +53,13 @@ class RequestsScreen extends React.Component {
        
        if (this.props.requests.isLoading)
             return (
-                <View style={{flex: 1, justifyContent: "center", alignItems: "center"}}> 
+                <View style={_styles.loadingContainer}> 
                     <ActivityIndicator size="large" color="#0000ff"/>
                     <Text style={{color: "blue", fontSize: 40, fontWeight: "bold"}}>Loading...</Text>            
                 </View>
             );
         else return (
-            <View style={{flex: 1}}>
+            <View style={_styles.container}>
                 <Header containerStyle={{height: 70, backgroundColor: 'black'}}>
                     <View/>
                     <View>
@@ -77,7 +80,7 @@ class RequestsScreen extends React.Component {
                             <SafeAreaView style={{flex: 1}}>
                                 <FlatList
                                     data={data}
-                                    renderItem={(renderFriendItem)}
+                                    renderItem={(renderRequestItem)}
                                     keyExtractor={item => item._id}
                                 />
                             </SafeAreaView>

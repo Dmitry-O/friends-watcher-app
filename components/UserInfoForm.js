@@ -5,6 +5,7 @@ import { Header, Icon } from 'react-native-elements';
 import {signupUser} from '../redux/ActionCreators';
 import {connect} from 'react-redux';
 import Main from './Main';
+import { _styles } from '../shared/styles';
 //import SigninForm from './SigninForm';
 
 //var first = 'https://media.wired.com/photos/5f5fdba8af1c7b1f76a6a86b/master/pass/Culture_Pokemane_vtuber.jpg';
@@ -25,66 +26,72 @@ const UserInfo = ({handleSignup, creds, auth}) => {
     const [userinfo, setUserinfo] = React.useState(creds);
     
     return (
-        <View style={{flex: 1}}>
-            <View style={styles.container}>
-                <Text style={{fontSize: 24, fontWeight: "300"}}>
-                    {creds.username} + {creds.password}
-                </Text>
-                <View style={{flexDirection: "row"}}>
-                    <Text>Full name:</Text>
-                    <TextInput style={styles.input}
-                        value={userinfo.fullname}
-                        onChangeText={text => setUserinfo({
-                            fullname: text,
-                            telnum: userinfo.telnum,
-                            visible: userinfo.visible,
-                            image: userinfo.image,
-                            username: userinfo.username,
-                            password: userinfo.password
-                        })}
-                        placeholder="Full name"
-                    />
-                </View>
-                <View style={{flexDirection: "row"}}>
-                    <Text>Tel. number:</Text>
-                    <TextInput style={styles.input}
-                        value={userinfo.telnum}
-                        onChangeText={text => setUserinfo({
-                            fullname: userinfo.fullname,
-                            telnum: text,
-                            visible: userinfo.visible,
-                            image: userinfo.image,
-                            username: userinfo.username,
-                            password: userinfo.password
-                        })}
-                        placeholder="Telephone number"
-                    />
-                </View>
-                <View style={{flexDirection: "row"}}>
-                    <Text>Would you like to be visible to your friends? </Text>
-                    <Switch
-                        trackColor={{ false: "#767577", true: "#81b0ff" }}
-                        thumbColor={userinfo.visible ? "#f5dd4b" : "#f4f3f4"}
-                        ios_backgroundColor="#3e3e3e"
-                        onValueChange={() => setUserinfo({
-                            fullname: userinfo.fullname,
-                            telnum: userinfo.telnum,
-                            visible: !userinfo.visible,
-                            image: userinfo.image,
-                            username: userinfo.username
-                        })}
-                        value={userinfo.visible}
-                    />
-                </View>
-                <Button title="Sign up" onPress={() => handleSignup(userinfo)}/>
-                { auth.isLoading ?
-                <View style={{flex: 1, justifyContent: "center", alignItems: "center"}}> 
-                    <ActivityIndicator size="large" color="#0000ff"/>
-                    <Text style={{color: "blue", fontSize: 40, fontWeight: "bold"}}>Loading...</Text>            
-                </View>
-                : null
-                }
+        <View style={styles.container}>
+            <Image style={{width: 250, height: 200, resizeMode: 'stretch', marginBottom: 30}} source={require("../shared/brand_logo.png")}/>
+            <View style={{marginBottom: 15}}>
+                <Text style={_styles.itemTitle}>Full name</Text>
+                <TextInput style={styles.input}
+                    value={userinfo.fullname}
+                    onChangeText={text => setUserinfo({
+                        fullname: text,
+                        telnum: userinfo.telnum,
+                        visible: userinfo.visible,
+                        image: userinfo.image,
+                        username: userinfo.username,
+                        password: userinfo.password
+                    })}
+                    placeholder="Full name"
+                    placeholderTextColor="#7d7d7d"
+                />
             </View>
+            <View style={{marginBottom: 30}}>
+                <Text style={_styles.itemTitle}>Telephone number</Text>
+                <TextInput style={styles.input}
+                    value={userinfo.telnum}
+                    onChangeText={text => setUserinfo({
+                        fullname: userinfo.fullname,
+                        telnum: text,
+                        visible: userinfo.visible,
+                        image: userinfo.image,
+                        username: userinfo.username,
+                        password: userinfo.password
+                    })}
+                    placeholder="Telephone number"
+                    placeholderTextColor="#7d7d7d"
+                />
+            </View>
+            <View style={{flexDirection: "row"}}>
+                <View style={{marginTop: 3}}>
+                    <Text style={_styles.itemSubtitle}>Would you like to be visible to your friends? </Text>
+                </View>
+                <Switch
+                    trackColor={{ false: "#767577", true: "#575DD9" }}
+                    thumbColor={userinfo.visible ? "#ffa900" : "#f4f3f4"}
+                    ios_backgroundColor="#3e3e3e"
+                    onValueChange={() => setUserinfo({
+                        fullname: userinfo.fullname,
+                        telnum: userinfo.telnum,
+                        visible: !userinfo.visible,
+                        image: userinfo.image,
+                        username: userinfo.username
+                    })}
+                    value={userinfo.visible}
+                />
+            </View>
+            <TouchableOpacity
+                activeOpacity={0.75}
+                onPress={() => handleSignup(userinfo)}
+                disabled={auth.isLoading ? true : false}
+                style={{backgroundColor: "#ffc400", width: 170, height: 40, alignItems: "center", justifyContent: "center", borderRadius: 5, marginTop: 40}}
+            >
+                { auth.isLoading ?
+                    <View style={{flex: 1, alignItems: "center", flexDirection: "row"}}> 
+                        <ActivityIndicator size="large" color="black"/>
+                        <Text style={{color: "black", marginLeft: 5, fontSize: 20, fontWeight: "bold"}}>Loading...</Text>            
+                    </View>
+                : <Text style={{color: "black", fontSize: 20, fontWeight: "bold"}}>Sign up</Text>
+                }
+            </TouchableOpacity>
         </View>
     );
 }
@@ -120,7 +127,7 @@ class UserInfoForm extends React.Component {
         return (
             <View style={{flex: 1}}>
                 {this.props.auth.isAuthenticated ? <Main/> : 
-                    <View>
+                    <View style={_styles.container}>
                         <Header containerStyle={{height: 70, backgroundColor: 'black'}}>
                             <View/>
                             <View>
@@ -149,7 +156,6 @@ class UserInfoForm extends React.Component {
 const styles = {
     container: {
         flex: 1,
-        justifyContent: 'center',
         alignItems: 'center',
         padding: 10
     },
@@ -157,9 +163,10 @@ const styles = {
         borderWidth: 1,
         borderColor: "#575DD9",
         alignSelf: "stretch",
-        margin: 32,
-        width: 200,
-        height: 40,
+        width: 300,
+        marginTop: 10,
+        height: 70,
+        color: "white",
         borderRadius: 6,
         fontSize: 24,
         fontWeight: "300",

@@ -21,6 +21,8 @@ loadToken();
 
 
 export const deleteFriend = (friendId) => (dispatch) => {
+    dispatch(friendsLoading(true));
+
     const bearer = 'Bearer ' + token;
 
     return fetch(baseUrl + 'friends/' + friendId, {
@@ -45,11 +47,57 @@ export const deleteFriend = (friendId) => (dispatch) => {
       })
     .then(response => response.json())
     .then(friends => { 
-        console.log('Friend deleted: ', req);
+        //console.log('Friend deleted: ', req);
         dispatch(addFriends(friends)); 
     })
     .catch(error => dispatch(friendsFailed(error.message)));
 }
+
+export const fetchFriendsCoords = () => (dispatch) => {
+    dispatch(friendsCoordsLoading(true));
+    const bearer = 'Bearer ' + token;
+
+    return fetch(baseUrl + 'friends/coords', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': bearer
+        },
+        credentials: 'same-origin'
+    })
+        .then(response => {
+            if (response.ok)
+                return response;
+            else {
+                var error = new Error('Error ' + response.status + ': ' + response.statusText);
+                error.response = response;
+                throw error;
+            }
+        },
+        error => {
+            var errmess = new Error(error.message);
+            throw errmess;
+        })
+        .then(response => {
+            return response.json();
+        })
+        .then(coords => dispatch(addFriendsCoords(coords)))
+        .catch(error => dispatch(friendsCoordsFailed(error.message)));
+}
+
+export const friendsCoordsLoading = () => ({
+    type: ActionTypes.FRIENDS_COORDS_LOADING
+});
+
+export const friendsCoordsFailed = (errmess) => ({
+    type: ActionTypes.FRIENDS_COORDS_FAILED,
+    payload: errmess
+});
+
+export const addFriendsCoords = (coords) => ({
+    type: ActionTypes.ADD_FRIENDS_COORDS,
+    payload: coords
+});
 
 export const fetchFriends = () => (dispatch) => {
     //console.log("2222222 Toooken: ", token);
@@ -173,6 +221,40 @@ export const postRequests = (requestId) => (dispatch) => {
     })
     .catch(error => dispatch(requestsFailed(error.message)));
 }
+
+export const deleteRequest = (requestId) => (dispatch) => {
+    dispatch(requestsLoading(true));
+    const bearer = 'Bearer ' + token;
+
+    return fetch(baseUrl + 'requests/' + requestId, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': bearer
+        },
+        credentials: "same-origin"
+    })
+    .then(response => {
+        if (response.ok) {
+          return response;
+        } else {
+          var error = new Error('Error ' + response.status + ': ' + response.statusText);
+          error.response = response;
+          throw error;
+        }
+      },
+      error => {
+            throw error;
+      })
+    .then(response => response.json())
+    .then(requests => { 
+        console.log('Request deleted: ', req);
+        dispatch(addRequests(requests)); 
+    })
+    .catch(error => dispatch(requestsFailed(error.message)));
+}
+
+
 
 export const postCoords = (coords) => (dispatch) => {
     const bearer = 'Bearer ' + token;

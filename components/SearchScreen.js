@@ -1,10 +1,11 @@
 import React from 'react';
-import { StyleSheet, ActivityIndicator, Text, View, FlatList, ScrollView, SafeAreaView, LogBox } from 'react-native';
+import { StyleSheet, ActivityIndicator, Text, View, FlatList, ScrollView, SafeAreaView, TouchableOpacity, LogBox } from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
 //import { createBottomTabNavigator, createAppContainer } from 'react-navigation';
 import { ListItem, Avatar, Button, Header, Icon } from 'react-native-elements';
 import {fetchUsers, postRequests} from '../redux/ActionCreators';
 import {connect} from 'react-redux';
+import { _styles } from '../shared/styles';
 
 const mapStateToProps = state => {
     return {
@@ -28,7 +29,7 @@ class SearchScreen extends React.Component {
         
         if (this.props.users.isLoading)
             return (
-                <View style={{flex: 1, justifyContent: "center", alignItems: "center"}}> 
+                <View style={_styles.loadingContainer}> 
                     <ActivityIndicator size="large" color="#0000ff"/>
                     <Text style={{color: "blue", fontSize: 40, fontWeight: "bold"}}>Loading...</Text>            
                 </View>
@@ -37,7 +38,7 @@ class SearchScreen extends React.Component {
     }
 }
 
-const styles = StyleSheet.create({
+const style = StyleSheet.create({
     searchInput: {
         borderWidth: 1,
         borderColor: "#575DD9",
@@ -51,10 +52,10 @@ const styles = StyleSheet.create({
         color: 'white'
     },
     itemTitle: {
-        color: 'black'
+        color: 'white'
     },
     itemSubtitle: {
-        color: 'black'
+        color: 'white'
     }
 });
 
@@ -74,45 +75,48 @@ const Search = ({data, postRequests}) => {
     const renderUsersItem = ({item, index}) => {
         //const backgroundColor = 'black';
         return (
-            <View style={{backgroundColor: 'transparent'}}>
-            <ListItem key={index} bottomDivider>
-                {item.image ? <Avatar rounded source={{uri: item.image}} /> : null}
+            <ListItem key={index} bottomDivider containerStyle={{backgroundColor: 'black', color: 'white'}}>
+                {item.image ? <Avatar rounded size="medium" avatarStyle={_styles.avatarStyle} source={{uri: item.image}} /> : null}
                 <ListItem.Content>
-                    <ListItem.Title style={styles.itemTitle}>{item.fullname}</ListItem.Title>
-                    <ListItem.Subtitle style={styles.itemSubtitle}>{item.username}</ListItem.Subtitle>
+                    <ListItem.Title style={_styles.itemTitle}>{item.fullname}</ListItem.Title>
+                    <ListItem.Subtitle style={_styles.itemSubtitle}>{item.username}</ListItem.Subtitle>
                 </ListItem.Content>
-                
-                <Button title={item.friend ? 'Friend added' : 'Add friend'}
+                <TouchableOpacity
+                    activeOpacity={0.75}
+                    style={{backgroundColor: "#ffc400", opacity: item.friend ? 0.5 : 1, width: 100, height: 40, alignItems: "center", justifyContent: "center", borderRadius: 5}}
                     disabled={item.friend ? true : false}
                     onPress={() => handlePostRequest(item._id)}
-                />    
-               
+                >
+                    <Text style={{color: "black", fontSize: 14, fontWeight: 'bold'}}>{item.friend ? 'Friend added' : 'Add friend'}</Text>
+                </TouchableOpacity>               
             </ListItem>
-            </View>  
         );
    };
 
    const renderFilteredUsers = filteredUsers.map((usr) => {
        if (usr)
             return (
-                <View style={{backgroundColor: 'red'}}>
-                <ListItem key={usr._id} bottomDivider>
-                    {usr.image ? <Avatar source={{uri: usr.image}} /> : null}
+                <ListItem key={usr._id} bottomDivider containerStyle={{backgroundColor: 'black'}}>
+                    {usr.image ? <Avatar size="medium" avatarStyle={_styles.avatarStyle} source={{uri: usr.image}} /> : null}
                     <ListItem.Content>
-                        <ListItem.Title>{usr.fullname}</ListItem.Title>
-                        <ListItem.Subtitle>{usr.username}</ListItem.Subtitle>
+                        <ListItem.Title style={_styles.itemTitle}>{usr.fullname}</ListItem.Title>
+                        <ListItem.Subtitle style={_styles.itemSubtitle}>{usr.username}</ListItem.Subtitle>
                     </ListItem.Content>
 
-                    <Button title={usr.friend ? 'Friend added' : 'Add friend'}
+                    <TouchableOpacity
+                        activeOpacity={0.75}
+                        style={{backgroundColor: "#ffc400", opacity: usr.friend ? 0.5 : 1, width: 100, height: 40, alignItems: "center", justifyContent: "center", borderRadius: 5}}
                         disabled={usr.friend ? true : false}
-                        onPress={() => handlePostRequest(usr._id)}/>
+                        onPress={() => handlePostRequest(usr._id)}
+                    >
+                        <Text style={{color: "black", fontSize: 14, fontWeight: 'bold'}}>{usr.friend ? 'Friend added' : 'Add friend'}</Text>
+                    </TouchableOpacity>
                 </ListItem>
-                </View>
             );
    });
 
     return (
-        <View style={{flex: 1, backgroundColor: 'black'}}>
+        <View style={_styles.container}>
             <Header containerStyle={{height: 70, backgroundColor: 'black'}}>
                 <View/>
                 <View>
@@ -128,15 +132,15 @@ const Search = ({data, postRequests}) => {
                 />
             </Header>
             <View style={{padding: 24, backgroundColor: 'black'}}>
-                <TextInput style={styles.searchInput} onChangeText={(text) => setSearch(text)}/>
-                <ScrollView style={{backgroundColor: 'black'}}>
+                <TextInput placeholder="Users searching" placeholderTextColor="#7d7d7d" style={_styles.searchInput} onChangeText={(text) => setSearch(text)}/>
+                <ScrollView>
                     {   search === '' ?
-                    <View style={{backgroundColor: 'black'}}>
-                        <FlatList
-                            data={data}
-                            renderItem={(renderUsersItem)}
-                            keyExtractor={item => item._id}
-                        />
+                        <View style={{height: 500}}>
+                            <FlatList
+                                data={data}
+                                renderItem={(renderUsersItem)}
+                                keyExtractor={item => item._id}
+                            />
                         </View>
                         : 
                         renderFilteredUsers
